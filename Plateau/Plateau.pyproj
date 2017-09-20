@@ -1,0 +1,51 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>dac32fb1-7670-49d9-96e7-561af822fd86</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>Plateau.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>Plateau</Name>
+    <RootNamespace>Plateau</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="aggregator.py" />
+    <Compile Include="CNN_data.py" />
+    <Compile Include="CNN_model.py" />
+    <Compile Include="CNN_PLATEAU.py" />
+    <Compile Include="cross_validation.py" />
+    <Compile Include="dataGenerator.py" />
+    <Compile Include="env.py" />
+    <Compile Include="evaluator.py" />
+    <Compile Include="fileController.py" />
+    <Compile Include="labelling.py" />
+    <Compile Include="modelController.py" />
+    <Compile Include="Plateau.py" />
+    <Compile Include="preprocess.py" />
+    <Compile Include="preprocess_image.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config.ini" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
