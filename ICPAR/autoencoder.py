@@ -70,14 +70,14 @@ def autoencoding_cnn(train_x, test_x, fold, img_dim=64, encoding_dim=32):
   print(autoencoder.summary())
   autoencoder.fit(r_train_x, r_train_x, epochs=10, batch_size=1000, shuffle=True)
   decoded_imgs = autoencoder.predict(r_test_x)
-  autoencoder.save('net/'+str(fold)+'.icp.net')
+  autoencoder.save('net/'+str(fold)+'.abp.net')
   
   return decoded_imgs
 
 def autoencding_cnn_using_net(test_x, fold):
   r_test_x = np.array(test_x).astype('float32')/255
   r_test_x = np.reshape(r_test_x, (len(r_test_x), 64, 64, 1))
-  autoencoder = load_model('net/'+str(fold)+'.icp.net')
+  autoencoder = load_model('net/'+str(fold)+'.abp.net')
   decoded_imgs = autoencoder.predict(r_test_x)
   return decoded_imgs
 

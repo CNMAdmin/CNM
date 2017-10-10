@@ -15,6 +15,8 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "VendingMachine", "VendingMa
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "CNTK", "CNTK\CNTK.pyproj", "{750D9EAC-2F74-4ACB-AE61-D442356E9034}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "ECGAnalysis", "ECGAnalysis\ECGAnalysis.pyproj", "{87FBF349-AF4E-4299-9808-CD5A30BF6589}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,8 @@ Global
 		{3B7BC2F1-BEA8-4E13-9A41-657A8E3BE525}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{750D9EAC-2F74-4ACB-AE61-D442356E9034}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{750D9EAC-2F74-4ACB-AE61-D442356E9034}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87FBF349-AF4E-4299-9808-CD5A30BF6589}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87FBF349-AF4E-4299-9808-CD5A30BF6589}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

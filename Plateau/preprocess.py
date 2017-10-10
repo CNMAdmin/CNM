@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 def fromOADate(v):
     return datetime(1899, 12, 30, 0, 0, 0, tzinfo=pytz.utc) + timedelta(days=v)
 
+
 def get_group(data):
     timelapse=data[0]
     timelist=[]

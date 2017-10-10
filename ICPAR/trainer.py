@@ -12,7 +12,7 @@ def data_load_module(tf):
   file = open('int/' + tf + '_1_int_rev.csv')
   lines = file.readlines()
   file.close()
-  arr = np.load('npy/' + tf + '.abp.t.npy')
+  arr = np.load('npy/' + tf + '.icp.t.npy')
   x = []; y = []; tl = []
   for line in lines:
     sl = line.split(',')
@@ -145,25 +145,7 @@ def get_pred_perfomance(test_y, pred_y, time_line):
 
 def read_1_file(file, pos):
   pid = file.split('.')[0].split('/')[-1]
-  f = open('int/'+pid+'_1_int_rev.csv')
-  lines = f.readlines()
-  f.close()
-  arr = np.load('npy/'+str(pos)+'/'+file)
-  x = []; y = []; tl = [];
-  for line in lines:
-    sl = line.split(',')
-    sid = int(sl[0])
-    if int(sl[1]) == 1:
-      y.append([1, 0])
-    else:
-      y.append([0, 1])
-    tl.append(float(sl[2]))
-    x.append(arr[sid])
-  return x, y, tl
-
-def read_1_icp_file(file, pos):
-  pid = file.split('.')[0].split('/')[-1]
-  f = open('int/icp/'+pid+'_1_int.csv')
+  f = open('10 icp int/'+pid+'_1_int.csv')
   lines = f.readlines()
   f.close()
   arr = np.load('npy/icp/'+str(pos)+'/'+file)
@@ -178,6 +160,25 @@ def read_1_icp_file(file, pos):
     tl.append(float(sl[2]))
     x.append(arr[sid])
   return x, y, tl
+
+def read_1_icp_file(file, pos):
+  pid = file.split('.')[0].split('/')[-1]
+  f = open('10 ICP int/'+pid+'_1_int.csv')
+  lines = f.readlines()
+  f.close()
+  arr = np.load('npy/icp/'+str(pos)+'/'+file)
+  x = []; y = []; tl = [];
+  for line in lines:
+    sl = line.split(',')
+    sid = int(sl[0])
+    if int(sl[1]) == 1:
+      y.append([1, 0])
+    else:
+      y.append([0, 1])
+    tl.append(float(sl[2]))
+    x.append(arr[sid])
+  return x, y, tl
+
 def time_based_amplitude(train):
   new_train = [[], [], []]
   for i in range(len(train[2])):
@@ -188,7 +189,7 @@ def time_based_amplitude(train):
   return new_train
 
 def read_module(pos):
-  files = os.listdir('npy/' + str(pos))
+  files = os.listdir('npy/icp/' + str(pos))
   test_x = []; test_y = []; test_tl = [];
   train_x = []; train_y = []; train_tl = [];
   for file in files:
@@ -216,25 +217,33 @@ def read_icp_module(pos):
   return [train_x, train_y, train_tl], [test_x, test_y, test_tl]
 
 def read_total_module():
-  files = os.listdir('npy/total/')
+  files = os.listdir('npy/icp/tot/')
   train_x = []; train_y = []; train_tl = [];
   for file in files:
-    x, y, tl = read_1_file(file, "total")
+    x, y, tl = read_1_file(file, "tot")
     train_x.extend(x); train_y.extend(y); train_tl.extend(tl)
   return [train_x, train_y, train_tl], [train_x, train_y, train_tl]
 
 
 if __name__=='__main__':
-  setting = 'icp'
-  pos = 2
+  path = 'G:/Richard/new/'
+  os.chdir(path)
+  setting = 'icp_none'
+  pos = 4
   print(str(pos))
   train, test = read_icp_module(pos)
-  train = time_based_amplitude(train)
+  #train = time_based_amplitude(train)
   model = create_model(64)
   print(model.summary())
-  model.fit(np.array(train[0]), np.array(train[1]), validation_data=(np.array(test[0]), np.array(test[1])), epochs=50)
-  model.save('net/CNN/'+str(pos)+'_' +setting+'_CNN50.net')
+  model.fit(np.array(train[0]), np.array(train[1]), validation_data=(np.array(test[0]), np.array(test[1])), epochs=10)
+  model.save('net/CNN/'+str(pos)+'_' +setting+'_CNN10.net')
   pred = model.predict(np.array(test[0]))
+  pen = open('test/'+str(pos) + '_' + setting + '.csv', 'w')
+  pen.write('idx,real,pred\n')
+  for i in range(len(test[1])):
+    pen.write(str(i) + ',' + str(test[1][i][0]) + ',' + str(pred[i][0]) + '\n')
+  pen.close()
+
   sentence = get_pred_perfomance(test[1], pred, test[2])
   pen = open('CNN_result.csv', 'a')
   pen.write('\n' + str(pos) + '_' + setting + ',' + sentence)
