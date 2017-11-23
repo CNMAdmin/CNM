@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>c5ca3590-1bd7-4dfd-a477-d8f7661f4d03</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>batch.py</StartupFile>
+    <StartupFile>one_step_in_10_fold.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -29,7 +29,13 @@
     </Compile>
     <Compile Include="GenImg.py" />
     <Compile Include="ICPAR.py" />
+    <Compile Include="ImgTester.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="main.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="one_step_in_10_fold.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="remover.py">

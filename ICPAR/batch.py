@@ -5,13 +5,13 @@ import autoencoder as ae
 import sys
 sys.setrecursionlimit(100000)
 
-fold1 = 'fold/abp/0/'
-fold2 = 'fold/abp/1/'
-fold3 = 'fold/abp/2/'
-fold4 = 'fold/abp/3/'
-fold5 = 'fold/abp/4/'
+fold1 = 'fold/icp/0/'
+fold2 = 'fold/icp/1/'
+fold3 = 'fold/icp/2/'
+fold4 = 'fold/icp/3/'
+fold5 = 'fold/icp/4/'
 
-path = 'G:/Richard/1010/'
+path = 'G:/Richard/1018/'
 
 if __name__ == '__main__':
   os.chdir(path)
@@ -22,7 +22,7 @@ if __name__ == '__main__':
   s_5, f_5 = ae.load_data(fold5)
   signals = [s_1, s_2, s_3, s_4, s_5]
   filenams = [f_1, f_2, f_3, f_4, f_5]
-  for i in range(4, 5):
+  for i in range(2, 4):
     print(str(i) + ' fold start!')
     s = []; f = []; sa = []; fa =[];
     for j  in range(5):
@@ -55,8 +55,8 @@ if __name__ == '__main__':
         npy_ori.append(total_image[m])
         npy_rep.append(total_rep_imgs[m])
         
-      np.save('npy/abp/'+str(i)+'/'+l+'.ori.npy', npy_ori)
-      np.save('npy/abp/'+str(i)+'/'+l+'.rep.npy', npy_rep)
+      np.save('npy/icp/'+str(i)+'/'+l+'.ori.npy', npy_ori)
+      np.save('npy/icp/'+str(i)+'/'+l+'.rep.npy', npy_rep)
       
     total_image = []
     total_signal = []
@@ -79,7 +79,7 @@ if __name__ == '__main__':
         npy_ori.append(total_image[m])
         npy_rep.append(total_rep_imgs[m])
 
-      np.save('npy/abp/'+str(i)+'/'+l+'.ori.non.npy', npy_ori)
-      np.save('npy/abp/'+str(i)+'/'+l+'.rep.non.npy', npy_rep)
+      np.save('npy/icp/'+str(i)+'/'+l+'.ori.non.npy', npy_ori)
+      np.save('npy/icp/'+str(i)+'/'+l+'.rep.non.npy', npy_rep)
     print(str(i) + ' fold finished!')
 

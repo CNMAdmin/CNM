@@ -43,7 +43,7 @@ def autoencoding(train_x, test_x, img_dim=128, encoding_dim=32):
   decoded_imgs = decoder.predict(encoded_imgs)
   return decoded_imgs
 
-def autoencoding_cnn(train_x, test_x, fold, img_dim=64, encoding_dim=32):
+def autoencoding_cnn(train_x, test_x, net_path, img_dim=64, encoding_dim=32):
 
   input_img = Input(shape=(img_dim, img_dim, 1))
   x = Conv2D(32, (3, 3), activation='relu', padding='same')(input_img)
@@ -68,16 +68,16 @@ def autoencoding_cnn(train_x, test_x, fold, img_dim=64, encoding_dim=32):
   r_test_x = np.array(test_x).astype('float32')/255
   r_test_x = np.reshape(r_test_x, (len(r_test_x), img_dim, img_dim, 1))
   print(autoencoder.summary())
-  autoencoder.fit(r_train_x, r_train_x, epochs=10, batch_size=1000, shuffle=True)
+  autoencoder.fit(r_train_x, r_train_x, epochs=10, batch_size=100, shuffle=True)
   decoded_imgs = autoencoder.predict(r_test_x)
-  autoencoder.save('net/'+str(fold)+'.abp.net')
+  autoencoder.save(net_path)
   
   return decoded_imgs
 
-def autoencding_cnn_using_net(test_x, fold):
+def autoencding_cnn_using_net(test_x, net_path):
   r_test_x = np.array(test_x).astype('float32')/255
   r_test_x = np.reshape(r_test_x, (len(r_test_x), 64, 64, 1))
-  autoencoder = load_model('net/'+str(fold)+'.abp.net')
+  autoencoder = load_model(net_path)
   decoded_imgs = autoencoder.predict(r_test_x)
   return decoded_imgs
 
@@ -121,14 +121,17 @@ def load_one_data(file_path):
   lines = f.readlines()
   f.close()
   cur_file_sig = []
+  time_len = []
   label = []
   for line in lines:
     sl  = line.split(',')
     label.append(int(sl[1]))
-    for s in sl[2:]:
+    time_len.append(float(sl[2]))
+    cur_sig = []
+    for s in sl[3:]:
       cur_sig.append(float(s))
     cur_file_sig.append(cur_sig)
-  return cur_file_sig, label
+  return cur_file_sig, label, time_len
 
 def load_data_raw(path):
   import os
