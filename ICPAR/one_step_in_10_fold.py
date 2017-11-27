@@ -121,7 +121,7 @@ def test(isABP):
   print(setting)
   for int_d in int_dat:
     file_names.append(int_d)
-  for i in range(8, 10):
+  for i in range(0, 10):
     train_ori = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.ori.npy')
     train_rep = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.rep.npy')
     train_etc = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.etc.npy')
@@ -132,6 +132,80 @@ def test(isABP):
     print(model.summary())
     new_train = augmentation(train_rep, label_gen(train_etc[0]), train_etc[1])
     model.fit(np.array(new_train[0]), np.array(new_train[1]), validation_data=(np.array(test_rep), np.array(label_gen(test_etc[0]))), epochs=10, shuffle=True)
+    model.save('net/CNN/'+str(i)+'_' +setting+'_CNN10_' + signal_tag + '.net')
+    pred = model.predict(np.array(test_rep))
+    pen = open('test/' + signal_tag + '/' + str(file_names[i]) + '_' + setting + '.csv', 'w')
+    pen.write('idx,real,pred\n')
+    for j in range(len(label_gen(test_etc[0]))):
+      pen.write(str(j) + ',' + str(test_etc[0][j]) + ',' + str(pred[j][0]) + '\n')
+    pen.close()
+    sentence = trainer.get_pred_perfomance(label_gen(test_etc[0]), pred, test_etc[1], test_rep)
+    pen = open('CNN_result.csv', 'a')
+    pen.write('\n' + str(file_names[i]) + '_' + setting + ',' + sentence)
+    pen.close()
+
+def ori_tfr(t):
+  tt = t.reshape(len(t), 64, 64, 1).astype('float32') / 255
+  return tt
+
+def test_ori(isABP):
+  signal_tag = 'ABP' if isABP else 'ICP'
+  int_dat = os.listdir('10 ' + signal_tag + ' int')
+  file_names = []
+  setting = "10 fold aug ori " + signal_tag
+  print(setting)
+  for int_d in int_dat:
+    file_names.append(int_d)
+  for i in range(0, 10):
+    train_ori = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.ori.npy')
+    #train_rep = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.rep.npy')
+    train_etc = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.etc.npy')
+    test_ori = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.test.ori.npy')
+    test_etc = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.test.etc.npy')
+    model = trainer.create_model(64)
+    print(model.summary())
+    new_train = augmentation(ori_tfr(train_ori), label_gen(train_etc[0]), train_etc[1])
+    model.fit(np.array(new_train[0]), np.array(new_train[1]), validation_data=(np.array(ori_tfr(test_ori)), np.array(label_gen(test_etc[0]))), epochs=10, shuffle=True)
+    model.save('net/CNN/'+str(i)+'_' +setting+'_CNN10_' + signal_tag + '.net')
+    pred = model.predict(np.array(test_ori))
+    pen = open('test/' + signal_tag + '/' + str(file_names[i]) + '_' + setting + '.csv', 'w')
+    pen.write('idx,real,pred\n')
+    for j in range(len(label_gen(test_etc[0]))):
+      pen.write(str(j) + ',' + str(test_etc[0][j]) + ',' + str(pred[j][0]) + '\n')
+    pen.close()
+    sentence = trainer.get_pred_perfomance(label_gen(test_etc[0]), pred, test_etc[1], test_rep)
+    pen = open('CNN_result.csv', 'a')
+    pen.write('\n' + str(file_names[i]) + '_' + setting + ',' + sentence)
+    pen.close()
+
+
+def test_lsvm(isABP, isRep, C=1.0):
+  signal_tag = 'ABP' if isABP else 'ICP'
+  train_tag = 'rep' if isRep else 'ori'
+  int_dat = os.listdir('10 ' + signal_tag + ' int')
+  file_names = []
+  setting = "10 fold aug lsvm " + str(C) + ' ' + signal_tag + ' ' + train_tag
+  print(setting)
+  for int_d in int_dat:
+    file_names.append(int_d)
+  for i in range(0, 10):
+    print(str(i) + ' fold start!')
+    train = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.'+train_tag+'.npy')
+    train_etc = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.etc.npy')
+    test = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.test.'+train_tag+'.npy')
+    test_etc = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.test.etc.npy')
+
+    if not isRep:
+      train = ori_tfr(train)
+      test = ori_tfr(test)
+
+    new_train = augmentation(train, label_gen(train_etc[0]), train_etc[1])
+
+    from sklearn import svm
+
+    model = svm.SVC(C=C)
+    print('Training....')
+    model.fit(np.array(new_train[0]), np.array(new_train[1]), validation_data=(np.array(test), np.array(label_gen(test_etc[0]))), epochs=10, shuffle=True)
     model.save('net/CNN/'+str(i)+'_' +setting+'_CNN10_' + signal_tag + '.net')
     pred = model.predict(np.array(test_rep))
     pen = open('test/' + signal_tag + '/' + str(file_names[i]) + '_' + setting + '.csv', 'w')
@@ -170,7 +244,9 @@ if __name__ =='__main__':
   os.chdir(path)
   #make_img()
   #gen_rep_img(isABP=True)
-  test(isABP=False)
-  #gen_full_train_network()
+  #test(isABP=False)
+  test_lsvm(isABP=False, isRep=False, C=.01)
+  #test_ori(isABP=False)
+  #gen_full_train_network(isABP=False)
     
     
