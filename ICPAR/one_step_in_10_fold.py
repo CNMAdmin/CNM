@@ -4,6 +4,23 @@ import numpy as np
 import trainer
 from keras.models import load_model
 
+def remove_label_generator(isABP, int_path):
+  signal_tag = 'ABP' if isABP else 'ICP'
+  model = load_model('net/CNN/FINAL_'+signal_tag+'.net')
+  files = os.listdir(int_path)
+  for file in files:
+    if file.split('.')[-1] != 'csv': continue
+    print(file)
+    sig, lab, tim = ae.load_one_data(int_path + '/' + file)
+    img = ae.signal_to_img(sig)
+    rep = ae.autoencding_cnn_using_net(img, 'net/FINAL_'+signal_tag+'.net')
+    pred = model.predict(rep)
+    pen = open('result/'+signal_tag+'/'+file+'.prd.fin.csv', 'w')
+    for i in range(len(pred)):
+      pen.write(str(i)+','+str(round(pred[i][0]))+'\n')
+    pen.close()
+  print('fin')
+
 def gen_full_train_network(isABP):
   signal_tag = 'ABP' if isABP else 'ICP'
   int_dat = os.listdir('10 ' + signal_tag + ' int')
@@ -15,7 +32,7 @@ def gen_full_train_network(isABP):
     train_t.extend(tim)
   train_x = ae.signal_to_img(train_x)
   train_rep = ae.autoencoding_cnn(train_x, train_x, 'net/FINAL_'+signal_tag+'.net')
-  new_train = augmentation(train_rep, label_gen(train_y), train_t)
+  new_train = n_augmentation(train_rep, label_gen(train_y), train_t)
   model = trainer.create_model(64)
   print(model.summary())
   model.fit(np.array(new_train[0]), np.array(new_train[1]), epochs=10, shuffle=True)
@@ -30,7 +47,9 @@ def remove_artifact(isABP, int_path):
   for v in samples:
     sig, lab, tim = ae.load_one_data(int_path + '/' + v)
     train_x = ae.signal_to_img(train_x)
-    train_rep_x = ae.autoencding_cnn_using_net(train_x, i)
+    train_rep_x = ae.autoencding_cnn_using_net(train_x, rep_model)
+
+
 
 def gen_rep_img(isABP):
   if isABP:
@@ -188,7 +207,7 @@ def test_ori(isABP):
   signal_tag = 'ABP' if isABP else 'ICP'
   int_dat = os.listdir('10 ' + signal_tag + ' int')
   file_names = []
-  setting = "10 fold aug ori " + signal_tag
+  setting = "10 fold non aug ori " + signal_tag
   print(setting)
   for int_d in int_dat:
     file_names.append(int_d)
@@ -200,7 +219,7 @@ def test_ori(isABP):
     test_etc = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.test.etc.npy')
     model = trainer.create_model(64)
     print(model.summary())
-    new_train = augmentation(ori_tfr(train_ori), label_gen(train_etc[0]), train_etc[1])
+    new_train = n_augmentation(ori_tfr(train_ori), label_gen(train_etc[0]), train_etc[1])
     model.fit(np.array(new_train[0]), np.array(new_train[1]), validation_data=(np.array(ori_tfr(test_ori)), np.array(label_gen(test_etc[0]))), epochs=10, shuffle=True)
     model.save('net/CNN/'+str(i)+'_' +setting+'_CNN10_' + signal_tag + '.net')
     pred = model.predict(np.array(ori_tfr(test_ori)))
@@ -209,7 +228,7 @@ def test_ori(isABP):
     for j in range(len(label_gen(test_etc[0]))):
       pen.write(str(j) + ',' + str(test_etc[0][j]) + ',' + str(pred[j][0]) + '\n')
     pen.close()
-    sentence = trainer.get_pred_perfomance(label_gen(test_etc[0]), pred, test_etc[1], test_rep)
+    sentence = trainer.get_pred_perfomance(label_gen(test_etc[0]), pred, test_etc[1], test_ori)
     pen = open('CNN_result.csv', 'a')
     pen.write('\n' + str(file_names[i]) + '_' + setting + ',' + sentence)
     pen.close()
@@ -267,7 +286,7 @@ def test_lsvm(isABP, C=1.0):
 
     from sklearn import svm
 
-    model = svm.SVC(C=C)
+    model = svm.LinearSVC(C=C)
     print('Training....')
     model.fit(np.array(train), np.array(train_etc[0]))
     #model.save('net/CNN/'+str(i)+'_' +setting+'_CNN10_' + signal_tag + '.net')
@@ -281,8 +300,45 @@ def test_lsvm(isABP, C=1.0):
     pen = open('CNN_result.csv', 'a')
     pen.write('\n' + str(file_names[i]) + '_' + setting + ',' + sentence)
     pen.close()
-    print(time.time() - start_fold + ' sec for this fold')
-  print(time.time() - start_total + ' sec for all process')
+    print(str(time.time() - start_fold) + ' sec for this fold')
+  print(str(time.time() - start_total) + ' sec for all process')
+
+def test_ksvm(isABP, C=1.0, gam=1.0):
+  import time
+  start_total = time.time()
+  signal_tag = 'ABP' if isABP else 'ICP'
+  int_dat = os.listdir('10 ' + signal_tag + ' int')
+  file_names = []
+  setting = "10 fold ksvm " + str(C) + '_' + str(gam) + ' ' + signal_tag
+  print(setting)
+  for int_d in int_dat:
+    file_names.append(int_d)
+  for i in range(0, 10):
+    start_fold = time.time()
+    print(str(i) + ' fold start!')
+    train = np.load('npy10/' + signal_tag + '_S/' + file_names[i] + '.train.ori.npy')
+    train_etc = np.load('npy10/' + signal_tag + '_S/' + file_names[i] + '.train.etc.npy')
+    test = np.load('npy10/' + signal_tag + '_S/' + file_names[i] + '.test.ori.npy')
+    test_etc = np.load('npy10/' + signal_tag + '_S/' + file_names[i] + '.test.etc.npy')
+
+    from sklearn import svm
+
+    model = svm.SVC(C=C, gamma=gam)
+    print('Training....')
+    model.fit(np.array(train), np.array(train_etc[0]))
+    #model.save('net/CNN/'+str(i)+'_' +setting+'_CNN10_' + signal_tag + '.net')
+    pred = model.predict(np.array(test))
+    pen = open('test/' + signal_tag + '/' + str(file_names[i]) + '_' + setting + '.csv', 'w')
+    pen.write('idx,real,pred\n')
+    for j in range(len(label_gen(test_etc[0]))):
+      pen.write(str(j) + ',' + str(test_etc[0][j]) + ',' + str(pred[j]) + '\n')
+    pen.close()
+    sentence = pred_test(pred, test_etc[0], test_etc[1])
+    pen = open('CNN_result.csv', 'a')
+    pen.write('\n' + str(file_names[i]) + '_' + setting + ',' + sentence)
+    pen.close()
+    print(str(time.time() - start_fold) + ' sec for this fold')
+  print(str(time.time() - start_total) + ' sec for all process')
 
 def make_img():
   import matplotlib.pyplot as plt
@@ -312,10 +368,11 @@ if __name__ =='__main__':
   #gen_rep_img(isABP=True)
   #test(isABP=True)
   #test_ori(isABP=True)
-  test_lsvm(isABP=True, C=0.01)
+  #test_lsvm(isABP=True, C=pow(2, 5))
+  test_ksvm(isABP=False, C=pow(2, 5), gam=pow(2, 5))
   #gen_full_train_network()
   #gen_svm_img(isABP=True)
   #gen_svm_img(isABP=False)
-
-    
+  #gen_full_train_network(isABP=True)
+  #remove_label_generator(isABP=True, int_path='F:/Richard/TBI 300/1st day ABP int')  
     
