@@ -177,7 +177,7 @@ def test(isABP):
   print(setting)
   for int_d in int_dat:
     file_names.append(int_d)
-  for i in range(4, 10):
+  for i in range(0, 10):
     train_ori = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.ori.npy')
     train_rep = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.rep.npy')
     train_etc = np.load('npy10/' + signal_tag + '/' + file_names[i] + '.train.etc.npy')
